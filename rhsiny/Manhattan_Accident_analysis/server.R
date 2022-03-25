@@ -1,4 +1,4 @@
-
+library(leaflet)
 library(shiny)
 library(shinydashboard)
 
@@ -12,4 +12,41 @@ function(input, output) {
   })
   output$plot4 <- renderPlot({accidents_by_hour_graph
   })
+    
+  output$CaseOccurrencePlot <- renderPlot({
+    if (input$Case1 == "Fatalities"){
+      x = accidents_per_year_killed
+      }
+    else if (input$Case1 == "Injuries"){
+      x = accidents_per_year_injured
+    }
+    else if (input$Case1 == "Property Damage"){
+      x = accidents_per_year_property
+    }
+    x
+    })
+  
+  output$CaseProportionPlot <- renderPlot({
+    if (input$Case2 == "Fatalities"){
+      x = accidents_per_year_killed_proportions
+    }
+    else if (input$Case2 == "Injuries"){
+      x = accidents_per_year_injured_proportion
+    }
+    else if (input$Case2 == "Property Damage"){
+      x = accidents_per_year_property_proportion
+    }
+    x
+  })
+  
+  output$myMap <- renderLeaflet({
+    leaflet()  %>%
+      addProviderTiles("Esri.WorldStreetMap") %>%
+      setView(lat = 40.766676,  lng = -73.971321,zoom = 12)%>%
+      addCircleMarkers(data = manhattan_crashes_lat_lon, lng = ~ LONGITUDE, lat = ~ LATITUDE, radius = 5, 
+                       clusterOptions = markerClusterOptions())
+  })
+  
+
+
 }

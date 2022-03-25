@@ -113,6 +113,30 @@ accidents_per_year_killed_proportions = ggplot(data=manhattan_crashes_by_year_ki
   ggtitle("People killed per year in Manhattan proportions")
 accidents_per_year_killed_proportions
 
+accidents_per_year_injured = 
+  ggplot(data=manhattan_crashes_by_year_injured, aes(x=year, y=n, group=1)) +
+  geom_line()+
+  geom_point() +
+  ggtitle("People injured per year in Manhattan")
+
+accidents_per_year_injured_proportion = 
+  ggplot(data=manhattan_crashes_by_year_injured, aes(x=year, y=proportion, group=1)) +
+  geom_line()+
+  geom_point() +
+  ggtitle("People injured per year in Manhattan proportions")
+
+accidents_per_year_property =
+  ggplot(data=manhattan_crashes_by_year_property, aes(x=year, y=n, group=1)) +
+  geom_line()+
+  geom_point() +
+  ggtitle("People injured per year in Manhattan proportions")
+
+accidents_per_year_property_proportion = 
+  ggplot(data=manhattan_crashes_by_year_property, aes(x=year, y=proportion, group=1)) +
+  geom_line()+
+  geom_point() +
+  ggtitle("People injured per year in Manhattan proportions")
+
 
 #map of hotzones of accidents. mean of latitude and longitude. one std of both and map it.
 #get rid of any rows with NA
