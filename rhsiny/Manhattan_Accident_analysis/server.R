@@ -40,11 +40,14 @@ function(input, output) {
   })
   
   output$myMap <- renderLeaflet({
-    leaflet()  %>%
+    leaflet(hg)  %>%
       addProviderTiles("Esri.WorldStreetMap") %>%
       setView(lat = 40.766676,  lng = -73.971321,zoom = 12)%>%
-      addCircleMarkers(data = manhattan_crashes_lat_lon, lng = ~ LONGITUDE, lat = ~ LATITUDE, radius = 5, 
-                       clusterOptions = markerClusterOptions())
+      
+      addCircles(lng = ~middle_longitude, lat = ~middle_latitude, weight = 1,
+                 radius = 120.7
+      )
+      
   })
   
 

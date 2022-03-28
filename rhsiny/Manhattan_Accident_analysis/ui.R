@@ -2,19 +2,17 @@ library(leaflet)
 library(shiny)
 library(shinydashboard)
 
-dashboardPage(
+dashboardPage(skin = "green",
   dashboardHeader(title = 'Manhattan Accidents'),
   
   
   dashboardSidebar(
-    sidebarUserPanel("hi"),
     sidebarMenu(id = 'sideBarMenu',
               menuItem("Introduction", tabName = "intro",icon = icon("map")),
               menuItem("Occurrences", tabName = "occurrence", icon = icon("map"),
                   menuSubItem("Collision by Year",tabName = "plot1", icon = icon("chart-line")),
-                  menuSubItem("Collision by Borough",tabName = "plot2", icon = icon("chart-bar")),
-                  menuSubItem("Collision by Day",tabName = "plot3", icon = icon("chart-bar")),
-                  menuSubItem("Collision by Hour",tabName = "plot4", icon = icon("chart-area"))),
+                  menuSubItem("Collision by Borough",tabName = "plot2", icon = icon("chart-line")),
+                  menuSubItem("Collision by Day",tabName = "plot3", icon = icon("chart-line"))),
               menuItem("Severity",tabName = "severity", icon = icon("chart-bar")),
               menuItem("Location",tabName = "location", icon = icon("chart-bar"))
               )),

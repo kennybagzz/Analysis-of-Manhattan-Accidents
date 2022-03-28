@@ -5,11 +5,30 @@ library(rmarkdown)
 library(ggplot2)
 library(dplyr)
 library("ggmap")
-
+library(stringr)
+library(ggrepel)
+library(ggrepel)
 #function to convert number into percentage
 percent <- function(x, digits = 2, format = "f", ...) {      
   paste0(formatC(x * 100, format = format, digits = digits, ...), "%")
 }
+
+getting_latlong_from_dataframe = function(column,lat_or_long){
+  ax = column[,]
+}
+a =accidents_group_by_latlong[, "latitude"]
+a
+axx = as.vector(a$latitude)
+axx
+bxx = gsub("\\(|\\]","", axx)
+bxx
+cxx = unlist(strsplit(bxx,","))
+cxx
+dxx = cxx[seq(1, 976, by = 2)]
+dxx
+exx = as.numeric(dxx)
+exx
+accidents_group_by_latlong$latitude1 = exx
 
 #load dataset
 nyc_crashes = read.csv("Motor_Vehicle_Collisions_-_Crashes.csv") 
@@ -33,8 +52,14 @@ manhattan_crashes_by_year = cleaned_manhattan_crashes %>% count(year)
 #use a line graph to visualize
 accidents_per_yr_graph = ggplot(data=manhattan_crashes_by_year, aes(x=year, y=n, group=1)) +
   geom_line()+
-  geom_point()+
-  ggtitle("Number of accidents per year in Manhattan")
+  geom_point(size = 4)+
+  ylab("Total") +
+  xlab("Year") + 
+  theme(plot.title = element_text(size=28))+
+  theme(axis.title = element_text(size = 24))+
+  theme(axis.text = element_text(size = 16))+
+  geom_label_repel(aes(label = n),size = 6)+
+  ggtitle("Number of Accidents Per Year in Manhattan")
 accidents_per_yr_graph
 
 
@@ -44,8 +69,15 @@ manhattan_crashes_by_month = cleaned_manhattan_crashes %>% count(month)
 #use line graph to visualize
 accidents_per_month_graph = ggplot(data=manhattan_crashes_by_month, aes(x=month, y=n, group=1)) +
   geom_line()+
-  geom_point()+
-  ggtitle("Number of accidents per month in Manhattan")
+  geom_point(size = 4)+
+  ylab("Total") +
+  xlab("Month") + 
+  theme(plot.title = element_text(size=28))+
+  theme(axis.title = element_text(size = 24))+
+  theme(axis.text = element_text(size = 16))+
+  geom_label_repel(aes(label = n),size = 6)+
+  scale_x_discrete(labels=c("Jan","Feb","Mar",'Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'))+
+  ggtitle("Number of Accidents Per Month in Manhattan")
 accidents_per_month_graph
 
 
@@ -54,8 +86,14 @@ accidents_per_month_graph
 manhattan_crashes_by_day = cleaned_manhattan_crashes%>% count(weekday)
 accidents_per_day_graph = ggplot(data=manhattan_crashes_by_day, aes(x=weekday, y=n, group=1)) +
   geom_line()+
-  geom_point() +
-  ggtitle("Number of accidents by day of week in Manhattan")
+  geom_point(size = 4) +
+  ylab("Total") +
+  xlab("Day of Week") +
+  theme(plot.title = element_text(size=28))+
+  theme(axis.title = element_text(size = 24))+
+  theme(axis.text = element_text(size = 16))+
+  geom_label_repel(aes(label = n),size = 6)+
+  ggtitle("Number of Accidents by Day of Week in Manhattan")
 accidents_per_day_graph
 
 
@@ -74,10 +112,13 @@ accidents_by_hour= cleaned_manhattan_crashes %>%
   summarise(n = n())
 sum(accidents_by_hour$n)
 
-accidents_by_hour_graph = ggplot(data=accidents_by_hour, aes(x=group, y=n, group=1)) +
+accidents_by_hour_graph = ggplot(data=accidents_by_hour, aes(x=group, y=n, group = 1)) +
   geom_line()+
   geom_point() +
-  ggtitle("People killed by hour in Manhattan")
+  scale_x_discrete(labels=as.character(c(seq(0,23))))+
+  ylab("Total") +
+  xlab("Time (24 hour clock)") +
+  ggtitle("Accidents by Hour in Manhattan")
 accidents_by_hour_graph
 
 #propotion of accidents with just property damage, proportion with at least 1 injured, no fatalities, proportion of at least 1 killed
@@ -119,23 +160,28 @@ accidents_per_year_injured =
   geom_point() +
   ggtitle("People injured per year in Manhattan")
 
+accidents_per_year_injured
+
 accidents_per_year_injured_proportion = 
   ggplot(data=manhattan_crashes_by_year_injured, aes(x=year, y=proportion, group=1)) +
   geom_line()+
   geom_point() +
   ggtitle("People injured per year in Manhattan proportions")
+accidents_per_year_injured_proportion
 
 accidents_per_year_property =
   ggplot(data=manhattan_crashes_by_year_property, aes(x=year, y=n, group=1)) +
   geom_line()+
   geom_point() +
   ggtitle("People injured per year in Manhattan proportions")
+accidents_per_year_property
 
 accidents_per_year_property_proportion = 
   ggplot(data=manhattan_crashes_by_year_property, aes(x=year, y=proportion, group=1)) +
   geom_line()+
   geom_point() +
   ggtitle("People injured per year in Manhattan proportions")
+accidents_per_year_property_proportion
 
 
 #map of hotzones of accidents. mean of latitude and longitude. one std of both and map it.
@@ -171,9 +217,83 @@ density_map
 
 #I have highlighted the intersections that have witnessed at least one accident per week on average
 accidents_group_by_latlong= manhattan_crashes_lat_lon %>%
-  group_by(latitude = cut(LATITUDE, breaks = seq(latitude_min, latitude_max+264/364000*3, 264/364000*3),dig.lab = 8), longitude = cut(LONGITUDE, breaks = seq(longitude_min, longitude_max+ 750/364000*3, 750/364000*3),dig.lab = 8)) %>%
+  group_by(latitude = cut(LATITUDE, breaks = seq(latitude_min, latitude_max+264/364000*4, 264/364000*4),dig.lab = 8), longitude = cut(LONGITUDE, breaks = seq(longitude_min, longitude_max+ 264/364000*4, 264/364000*4),dig.lab = 8)) %>%
   summarise(n = n())
 accidents_group_by_latlong$accidents_per_week = accidents_group_by_latlong$n/468  
+accidents_group_by_latlong = na.omit(accidents_group_by_latlong)
+
+accidents_group_by_latlongyear = manhattan_crashes_lat_lon %>%
+  group_by(latitude = cut(LATITUDE, breaks = seq(latitude_min, latitude_max+264/364000*3, 264/364000*3),dig.lab = 8,), longitude = cut(LONGITUDE, breaks = seq(longitude_min, longitude_max+ 264/364000*3, 264/364000*3),dig.lab = 8),year) %>%
+  summarise(n = n())
+accidents_group_by_latlongyear$accidents_per_week = accidents_group_by_latlongyear$n/52  
 
 
+
+accidents_group_by_latlong$latitude1 = accidents_group_by_latlong[,1]
+
+a =accidents_group_by_latlong[1,1]
+a
+axx = as.vector(a$latitude[1])[1]
+axx
+bxx = gsub("\\(|\\]","", axx)
+bxx
+
+cxx = unlist(strsplit(bxx,","))
+cxx
+dxx = as.numeric(cxx[1])
+dxx
+
+
+getting_latlong_from_dataframe = function(df,df_column_name,one_or_two, new_column_name) {
+  options(digits=9)
+  a= gsub("\\(|\\]","",as.vector(df[,df_column_name]))
+  df[new_column_name] = a[seq(one_or_two,nrow(df)*2, by = 2)] %>%
+   as.numeric()
+}
+nrow(accidents_group_by_latlong) *2
+
+getting_latlong_from_dataframe(accidents_group_by_latlong,"latitude", 1, "latitude1")
+
+a =accidents_group_by_latlong[,"longitude"]
+a
+axx = as.vector(a$longitude)
+axx
+bxx = gsub("\\(|\\]","", axx)
+bxx
+cxx = unlist(strsplit(bxx,","bxx))
+cxx
+dxx = cxx[seq(2,1410, by = 2)]
+dxx
+options(digits=9)
+exx = as.numeric(dxx)
+exx
+accidents_group_by_latlong$latitude1 = exx
+
+accidents_group_by_latlong$latitude2 = exx
+
+accidents_group_by_latlong$longitude1 = exx
   
+accidents_group_by_latlong$longitude2 = exx
+
+accidents_group_by_latlong$middle_latitude = (accidents_group_by_latlong$latitude1 +accidents_group_by_latlong$latitude2)/2
+
+accidents_group_by_latlong$middle_longitude = (accidents_group_by_latlong$longitude1 + accidents_group_by_latlong$longitude2)/2
+
+
+
+hg = filter(accidents_group_by_latlong, accidents_per_week >0.95)
+
+hgb
+
+vas = manhattan_crashes_lat_lon %>%
+  group_by(latitude = LATITUDE, longitude = LONGITUDE )%>%
+  summarise(n = n())
+
+vas$accidentsperweek = vas$n/ 468
+
+asd = manhattan_crashes_lat_lon %>%
+  group_by(ZIP.CODE) %>%
+  summarise(n = n())
+asd
+
+
