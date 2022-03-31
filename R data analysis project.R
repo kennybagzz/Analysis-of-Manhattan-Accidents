@@ -11,20 +11,8 @@ library(ggrepel)
 #function to convert number into percentage
 percent <- function(x, digits = 2, format = "f", ...) {      
   paste0(formatC(x * 100, format = format, digits = digits, ...), "%")
+
 }
-accidents_per_year_block = function(lat, long){
-  p<- filter(accidents_group_by_latlongyear,middle_latitude == lat & middle_longitude == long)
-  g= ggplot(data=p, aes(x=year, y=accidents_per_week))+
-    geom_line()+
-    geom_point(size = 4)+
-    ylab("Accidents Per Week") +
-    xlab("Year") + 
-    theme(plot.title = element_text(size=28))+
-    theme(axis.title = element_text(size = 24))+
-    theme(axis.text = element_text(size = 16))+
-    geom_label_repel(aes(label = n),size = 6)+
-    ggtitle("Number of Accidents Per Week at this location")
-  }
 
 
 #load dataset
@@ -33,6 +21,10 @@ nyc_crashes = read.csv("Motor_Vehicle_Collisions_-_Crashes.csv")
 manhattan_crashes = nyc_crashes[nyc_crashes$BOROUGH == "MANHATTAN",]
 #then filter dataset for accidents from 2013-2021 since reports from 2012 and 2022 is incomplete
 manhattan_crashes$CRASH.DATE = as.Date(manhattan_crashes$CRASH.DATE, "%m/%d/%Y")
+manhattan_crashes[, "year"] = format(manhattan_crashes[, "CRASH.DATE"], "%Y")
+people_killed_a_year = group_by(manhattan_crashes, year) %>%
+  summarise(people_killed = sum(NUMBER.OF.PERSONS.KILLED,na.rm = TRUE))
+
 cleaned_manhattan_crashes = filter(manhattan_crashes, CRASH.DATE > as.Date("2012-12-31") & CRASH.DATE < as.Date("2022-01-01"))
 
 
@@ -43,6 +35,38 @@ cleaned_manhattan_crashes = filter(manhattan_crashes, CRASH.DATE > as.Date("2012
 cleaned_manhattan_crashes[, "year"] = format(cleaned_manhattan_crashes[, "CRASH.DATE"], "%Y")
 cleaned_manhattan_crashes[, "month"] = format(cleaned_manhattan_crashes[, "CRASH.DATE"], "%m")
 cleaned_manhattan_crashes$weekday <- wday(cleaned_manhattan_crashes$CRASH.DATE, label=TRUE, abbr=FALSE)
+
+people_killed_a_year = group_by(cleaned_manhattan_crashes, year) %>%
+  summarise(people_killed = sum(NUMBER.OF.PERSONS.KILLED, na.rm = TRUE))
+
+people_injured_a_year = group_by(cleaned_manhattan_crashes, year) %>%
+  summarise(people_injured = sum(NUMBER.OF.PERSONS.INJURED, na.rm = TRUE))
+people_injured_a_year
+
+graph_people_killed_yr = ggplot(data=people_killed_a_year, aes(x=year, y=people_killed, group=1)) +
+  geom_line()+
+  geom_point(size = 4)+
+  ylab("Total") +
+  xlab("Year") + 
+  theme(plot.title = element_text(size=28))+
+  theme(axis.title = element_text(size = 24))+
+  theme(axis.text = element_text(size = 16))+
+  geom_label_repel(aes(label = people_killed),size = 6)+
+  scale_y_continuous(breaks = seq(20, 45, by =5))+
+  ggtitle("People Killed Per Year in Manhattan")
+graph_people_killed_yr
+
+graph_people_injured_yr = ggplot(data=people_injured_a_year, aes(x=year, y=people_injured, group=1)) +
+  geom_line()+
+  geom_point(size = 4)+
+  ylab("Total") +
+  xlab("Year") + 
+  theme(plot.title = element_text(size=28))+
+  theme(axis.title = element_text(size = 24))+
+  theme(axis.text = element_text(size = 16))+
+  geom_label_repel(aes(label = people_injured),size = 6)+
+  ggtitle("People Injured Per Year in Manhattan")
+graph_people_injured_yr
 
 #find out how many accidents a year
 manhattan_crashes_by_year = cleaned_manhattan_crashes %>% count(year)
@@ -223,20 +247,39 @@ accidents_per_year_property_proportion =
 accidents_per_year_property_proportion
 
 idc = ggplot(data=manhattan_crashes_by_year_killed, aes(x=year, y=n, group=1)) +
-  geom_line()+
-  geom_line(data=manhattan_crashes_by_year_injured, aes(x=year,y=n)) + 
-  geom_line(data=manhattan_crashes_by_year_property, aes(x=year, y=n))+
-  geom_point(size = 4) +
-  geom_point(data = manhattan_crashes_by_year_injured,size = 4)+
-  ylab("Proportion (%)") +
+  geom_line(color = "red")+
+  geom_line(data=manhattan_crashes_by_year_injured, aes(x=year,y=n), color = "green") + 
+  geom_line(data=manhattan_crashes_by_year_property, aes(x=year, y=n), color = "blue")+
+  geom_point(color = "red",size = 4) +
+  geom_point(data = manhattan_crashes_by_year_injured,size = 4, color  = "green")+
+  geom_point(data=manhattan_crashes_by_year_property, size = 4, color = "blue")+
+  ylab("Total Accidents") +
   xlab("Year") + 
   theme(plot.title = element_text(size=22))+
   theme(axis.title = element_text(size = 24))+
   theme(axis.text = element_text(size = 16))+
   geom_label_repel(aes(label = n),size = 4)+
-  scale_y_continuous(breaks = seq(0, 40000, by = 2500))+
-  ggtitle("Proportions of Accidents Involving Only Property Damage")
+  scale_y_continuous(breaks = seq(0, 36000, by = 4000))+
+  ggtitle("Total Accidents by Case")
 idc
+
+idc_proportions = ggplot(data=manhattan_crashes_by_year_killed, aes(x=year, y=proportion, group=1)) +
+  geom_line(color = "red")+
+  geom_line(data=manhattan_crashes_by_year_injured, aes(x=year,y=proportion), color = "green") + 
+  geom_line(data=manhattan_crashes_by_year_property, aes(x=year, y=proportion), color = "blue")+
+  geom_point(color = "red",size = 4) +
+  geom_point(data = manhattan_crashes_by_year_injured,size = 4, color  = "green")+
+  geom_point(data=manhattan_crashes_by_year_property, size = 4, color = "blue")+
+  ylab("Proportions (%)") +
+  xlab("Year") + 
+  theme(plot.title = element_text(size=22))+
+  theme(axis.title = element_text(size = 20))+
+  theme(axis.text = element_text(size = 14))+
+  geom_label_repel(aes(label = proportion),size = 4)+
+  scale_y_continuous(breaks = seq(0, 90, by = 10))+
+  ggtitle("Proportions by Case")
+idc_proportions
+
 #map of hotzones of accidents. mean of latitude and longitude. one std of both and map it.
 #get rid of any rows with NA
 manhattan_crashes_no_NAs = na.omit(cleaned_manhattan_crashes )
@@ -316,6 +359,7 @@ options(digits=9)
 eww = as.numeric(dww)
 accidents_group_by_latlongyear$longitude2 = eww
 
+options(digits=9)
 accidents_group_by_latlongyear$middle_latitude = (accidents_group_by_latlongyear$latitude1 +accidents_group_by_latlongyear$latitude2)/2
 
 accidents_group_by_latlongyear$middle_longitude = (accidents_group_by_latlongyear$longitude1 + accidents_group_by_latlongyear$longitude2)/2
@@ -387,20 +431,8 @@ accidents_group_by_latlong$middle_longitude = (accidents_group_by_latlong$longit
 
 
 
-hg = filter(accidents_group_by_latlong, accidents_per_week >0.95)
 
-hgb
 
-vas = manhattan_crashes_lat_lon %>%
-  group_by(latitude = LATITUDE, longitude = LONGITUDE )%>%
-  summarise(n = n())
 
-vas$accidentsperweek = vas$n/ 468
 
-asd = mapply(accidents_per_year_block, accidents_group_by_latlong$middle_latitude,accidents_group_by_latlong$middle_longitude)
-             
 
-view(asd[1])
-             
-             
-             

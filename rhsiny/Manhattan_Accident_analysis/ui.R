@@ -19,10 +19,6 @@ dashboardPage(skin = "green",
   
 dashboardBody(
   tabItems(
-    tabItem(tabName = 'intro',
-      tabsetPanel(
-        tabPanel("Plots", "hi"),
-        tabPanel("hello", "hi"))),
     
     tabItem(tabName = "plot1",
             fluidRow(box(
@@ -42,10 +38,21 @@ dashboardBody(
               width = 12))),
     tabItem(tabName = 'severity',
             tabsetPanel(
-              tabPanel("Occurrences", fluidRow(
-                column(width =12, selectizeInput(inputId = "Case1",
+              tabPanel("Casualties per Year", fluidRow(
+                column(width =12, selectizeInput(inputId = "Case3",
                                                  label = "Case",
-                                                 choices = c("Fatalities", "Injuries", "Property Damage")
+                                                 choices = c("Fatalities", "Injuries")
+                )
+                )
+              ),
+              fluidRow(
+                column(
+                  width = 8,
+                  plotOutput("CasualtyPlot")))),
+              tabPanel("Occurrences per Year", fluidRow(
+                column(width =12, selectizeInput(inputId = "Case1",
+                                                 label = "Casualty",
+                                                 choices = c("All", "Fatalities", "Injuries", "Property Damage")
                 )
                 )
               ),
@@ -55,10 +62,10 @@ dashboardBody(
                   width = 8,
                   plotOutput("CaseOccurrencePlot")))),
             
-              tabPanel("Proportions", fluidRow(
+              tabPanel("Proportions per Year", fluidRow(
                 column(width =12, selectizeInput(inputId = "Case2",
                                                  label = "Case",
-                                                 choices = c("Fatalities", "Injuries", "Property Damage")
+                                                 choices = c("All", "Fatalities", "Injuries", "Property Damage")
                 )
                 )
               ), fluidRow(
@@ -67,12 +74,21 @@ dashboardBody(
                   plotOutput("CaseProportionPlot")))
               ))),
     tabItem(tabName = 'location',
-                    fluidRow(box(
-                      leafletOutput("myMap",
-                                    height = 650),
-                      width = 12))
+            tabsetPanel(
+            tabPanel("Location",
+            
+                     fluidRow(box(
+                       leafletOutput("myMap",
+                                     height = 650),
+                       width = 12))),
+          tabPanel("Heatmap",
+           
+           fluidRow(box(
+             leafletOutput("Accident Hotzone",
+                           height = 650),
+             width = 12)))))
             )))
     
-  )
+  
 
 
