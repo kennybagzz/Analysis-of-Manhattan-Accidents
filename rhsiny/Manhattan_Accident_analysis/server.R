@@ -2,6 +2,7 @@ library(leaflet)
 library(shiny)
 library(shinydashboard)
 library(leafpop)
+library(rsconnect)
 
 # Define server logic required to draw a histogram
 function(input, output) {
@@ -46,11 +47,11 @@ function(input, output) {
     x
   })
   
-  output$CaseProportionPlot <- renderPlot({
-    if (input$CasualtyPlot == "Fatalities"){
+  output$CasualtyProportionPlot <- renderPlot({
+    if (input$Case3 == "Fatalities"){
       x = graph_people_killed_yr
     }
-    else if (input$CasualtyPlot == "Injuries"){
+    else if (input$Case3 == "Injuries"){
       x = graph_people_injured_yr
     }
     x

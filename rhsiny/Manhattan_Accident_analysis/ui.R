@@ -1,6 +1,8 @@
 library(leaflet)
 library(shiny)
 library(shinydashboard)
+library(rsconnect)
+
 
 dashboardPage(skin = "green",
   dashboardHeader(title = 'Manhattan Accidents'),
@@ -48,8 +50,8 @@ dashboardBody(
               fluidRow(
                 column(
                   width = 8,
-                  plotOutput("CasualtyPlot")))),
-              tabPanel("Occurrences per Year", fluidRow(
+                  plotOutput("CasualtyProportionPlot")))),
+              tabPanel("Accidents per Year", fluidRow(
                 column(width =12, selectizeInput(inputId = "Case1",
                                                  label = "Casualty",
                                                  choices = c("All", "Fatalities", "Injuries", "Property Damage")

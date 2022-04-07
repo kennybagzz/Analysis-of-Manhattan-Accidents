@@ -7,7 +7,7 @@ library(dplyr)
 library("ggmap")
 library(stringr)
 library(ggrepel)
-
+library(rsconnect)
 #function to convert number into percentage
 percent <- function(x, digits = 2, format = "f", ...) {      
   paste0(formatC(x * 100, format = format, digits = digits, ...), "%")
@@ -43,6 +43,7 @@ people_injured_a_year = group_by(cleaned_manhattan_crashes, year) %>%
   summarise(people_injured = sum(NUMBER.OF.PERSONS.INJURED, na.rm = TRUE))
 people_injured_a_year
 
+
 graph_people_killed_yr = ggplot(data=people_killed_a_year, aes(x=year, y=people_killed, group=1)) +
   geom_line()+
   geom_point(size = 4)+
@@ -57,7 +58,7 @@ graph_people_killed_yr = ggplot(data=people_killed_a_year, aes(x=year, y=people_
 graph_people_killed_yr
 
 graph_people_injured_yr = ggplot(data=people_injured_a_year, aes(x=year, y=people_injured, group=1)) +
-  geom_line()+
+  geom_line(color = 'red')+
   geom_point(size = 4)+
   ylab("Total") +
   xlab("Year") + 
@@ -67,6 +68,11 @@ graph_people_injured_yr = ggplot(data=people_injured_a_year, aes(x=year, y=peopl
   geom_label_repel(aes(label = people_injured),size = 6)+
   ggtitle("People Injured Per Year in Manhattan")
 graph_people_injured_yr
+
+casualties_by_year =data.frame(year = c(2013:2021),
+                               casualties = people_injured_a_year$people_injured +people_killed_a_year$people_killed)
+casualties_by_year$casualties_per_accident = casualties_by_year$casualties/manhattan_crashes_by_year$n
+casualties_by_year$casualties_per_accident =round(casualties_by_year$casualties_per_accident, digits = 2)
 
 #find out how many accidents a year
 manhattan_crashes_by_year = cleaned_manhattan_crashes %>% count(year)
@@ -152,13 +158,13 @@ manhattan_crashes_by_year_killed = filter(manhattan_crashes_by_year_killed, `NUM
 options(digits = 1)
 manhattan_crashes_by_year_killed$proportion = (manhattan_crashes_by_year_killed$n /manhattan_crashes_by_year$n) * 100
 manhattan_crashes_by_year_killed$proportion = round(manhattan_crashes_by_year_killed$proportion,digits =2)
-manhattan_crashes_by_year_killed$proportion = percent(manhattan_crashes_by_year_killed$proportion)
+#manhattan_crashes_by_year_killed$proportion = percent(manhattan_crashes_by_year_killed$proportion)
 
 manhattan_crashes_by_year_injured = cleaned_manhattan_crashes %>% count(year,NUMBER.OF.PERSONS.INJURED > 0 & NUMBER.OF.PERSONS.KILLED == 0)
 manhattan_crashes_by_year_injured = filter(manhattan_crashes_by_year_injured, `NUMBER.OF.PERSONS.INJURED > 0 & ...` == "TRUE" )
 manhattan_crashes_by_year_injured$proportion = (manhattan_crashes_by_year_injured$n/ manhattan_crashes_by_year$n)*100
 manhattan_crashes_by_year_injured$proportion = round(manhattan_crashes_by_year_injured$proportion,digits =2)
-manhattan_crashes_by_year_injured$proportion = percent(manhattan_crashes_by_year_injured$proportion)
+#manhattan_crashes_by_year_injured$proportion = percent(manhattan_crashes_by_year_injured$proportion)
 
 
 manhattan_crashes_by_year_property = cleaned_manhattan_crashes %>% count(year,NUMBER.OF.PERSONS.INJURED == 0 & NUMBER.OF.PERSONS.KILLED == 0)
@@ -166,7 +172,7 @@ manhattan_crashes_by_year_property = filter(manhattan_crashes_by_year_property, 
 options(digits = 4)
 manhattan_crashes_by_year_property$proportion = (manhattan_crashes_by_year_property$n /manhattan_crashes_by_year$n) * 100
 manhattan_crashes_by_year_property$proportion = round(manhattan_crashes_by_year_property$proportion, digits=1)
-manhattan_crashes_by_year_property$proportion = percent(manhattan_crashes_by_year_property$proportion)
+#manhattan_crashes_by_year_property$proportion = percent(manhattan_crashes_by_year_property$proportion)
 as.numeric_version(manhattan_crashes_by_year_property$proportion)
 
 #visualization of how many people killed each year and proportion
@@ -246,40 +252,53 @@ accidents_per_year_property_proportion =
   ggtitle("Proportions of Accidents Involving Only Property Damage")
 accidents_per_year_property_proportion
 
+colorss <- c("Property" = "blue", "Injuries" = "green", "Fatalities" = "red")
 idc = ggplot(data=manhattan_crashes_by_year_killed, aes(x=year, y=n, group=1)) +
-  geom_line(color = "red")+
-  geom_line(data=manhattan_crashes_by_year_injured, aes(x=year,y=n), color = "green") + 
-  geom_line(data=manhattan_crashes_by_year_property, aes(x=year, y=n), color = "blue")+
-  geom_point(color = "red",size = 4) +
-  geom_point(data = manhattan_crashes_by_year_injured,size = 4, color  = "green")+
-  geom_point(data=manhattan_crashes_by_year_property, size = 4, color = "blue")+
+  geom_line(aes(color = "Fatalities"))+
+  geom_line(data=manhattan_crashes_by_year_injured, aes(x=year,y=n, color = "Injuries")) + 
+  geom_line(data=manhattan_crashes_by_year_property, aes(x=year, y=n, color = "Property"), color = 'blue')+
+  geom_point(aes(color = "Fatalities"),size = 4) +
+  geom_point(data = manhattan_crashes_by_year_injured,size = 4, aes(color = "Injuries"))+
+  geom_point(data=manhattan_crashes_by_year_property, size = 4, aes(color = "Property"), color = 'blue')+
   ylab("Total Accidents") +
   xlab("Year") + 
+  labs(color = "Legend")+
   theme(plot.title = element_text(size=22))+
   theme(axis.title = element_text(size = 24))+
   theme(axis.text = element_text(size = 16))+
-  geom_label_repel(aes(label = n),size = 4)+
+  geom_label_repel(data = manhattan_crashes_by_year_property[manhattan_crashes_by_year_property$year == c(2016,2020,2018),],aes(label = n),size = 4)+
+  geom_label_repel(data = manhattan_crashes_by_year_injured[manhattan_crashes_by_year_injured$year == c(2013,2020,2018),],aes(label = n),size = 4, y_lim = c(NA,40), na.rm = TRUE)+
+  geom_label_repel(data = manhattan_crashes_by_year_killed[manhattan_crashes_by_year_killed$year == c(2013:2021),],aes(label = n),size = 4)+
   scale_y_continuous(breaks = seq(0, 36000, by = 4000))+
+  scale_color_manual(values = colorss)+
+  theme(legend.title = element_text(size = 16),
+        legend.text = element_text(size = 14),
+        legend.key.height = unit(1,'cm'),
+        legend.key.width = unit(1,"cm"))+
   ggtitle("Total Accidents by Case")
 idc
 
+colorss <- c("Property" = "blue", "Injuries" = "green", "Fatalities" = "red")
 idc_proportions = ggplot(data=manhattan_crashes_by_year_killed, aes(x=year, y=proportion, group=1)) +
-  geom_line(color = "red")+
-  geom_line(data=manhattan_crashes_by_year_injured, aes(x=year,y=proportion), color = "green") + 
-  geom_line(data=manhattan_crashes_by_year_property, aes(x=year, y=proportion), color = "blue")+
-  geom_point(color = "red",size = 4) +
-  geom_point(data = manhattan_crashes_by_year_injured,size = 4, color  = "green")+
-  geom_point(data=manhattan_crashes_by_year_property, size = 4, color = "blue")+
+  geom_line(aes(color = "Fatalities"))+
+  geom_line(data=manhattan_crashes_by_year_injured, aes(x=year,y=proportion, color = "Injuries")) + 
+  geom_line(data=manhattan_crashes_by_year_property, aes(x=year, y=proportion, color = "Property"), color = 'blue')+
+  geom_point(aes(color = "Fatalities"),size = 4) +
+  geom_point(data = manhattan_crashes_by_year_injured,size = 4, aes(color  = "Injuries"))+
+  geom_point(data=manhattan_crashes_by_year_property, size = 4, aes(color = "Property"), color = 'blue')+
   ylab("Proportions (%)") +
   xlab("Year") + 
+  labs(color = "Legend")+
   theme(plot.title = element_text(size=22))+
   theme(axis.title = element_text(size = 20))+
   theme(axis.text = element_text(size = 14))+
+  scale_y_continuous(breaks = seq(0,90, by = 10))+
+  geom_label_repel(data = manhattan_crashes_by_year_property[manhattan_crashes_by_year_property$year == c(2013,2020,2021),],aes(label = proportion),size = 4)+
+  geom_label_repel(data = manhattan_crashes_by_year_injured[manhattan_crashes_by_year_injured$year == c(2013,2020,2021),],aes(label = proportion),size = 4, y_lim = c(NA,40))+
   geom_label_repel(aes(label = proportion),size = 4)+
-  scale_y_continuous(breaks = seq(0, 90, by = 10))+
+  scale_color_manual(values = colorss)+
   ggtitle("Proportions by Case")
 idc_proportions
-
 #map of hotzones of accidents. mean of latitude and longitude. one std of both and map it.
 #get rid of any rows with NA
 manhattan_crashes_no_NAs = na.omit(cleaned_manhattan_crashes )
