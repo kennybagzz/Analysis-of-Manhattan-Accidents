@@ -54,11 +54,14 @@ function(input, output) {
     else if (input$Case3 == "Injuries"){
       x = graph_people_injured_yr
     }
+    else if (input$Case3 == "Casualties Per Accident"){
+      x = casualties_per_accident_graph
+    }
     x
   })
   
   output$myMap <- renderLeaflet({
-    leaflet(filter(accidents_group_by_latlong, accidents_per_week >0.99))  %>%
+    leaflet(filter(accidents_group_by_latlong, accidents_per_week >0.91))  %>%
       addProviderTiles("Esri.WorldStreetMap") %>%
       setView(lat = 40.766676,  lng = -73.971321,zoom = 12)%>%
       addCircles(lng = ~middle_longitude, lat = ~middle_latitude, weight = 1,

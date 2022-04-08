@@ -42,8 +42,8 @@ dashboardBody(
             tabsetPanel(
               tabPanel("Casualties per Year", fluidRow(
                 column(width =12, selectizeInput(inputId = "Case3",
-                                                 label = "Case",
-                                                 choices = c("Fatalities", "Injuries")
+                                                 label = "Casualty",
+                                                 choices = c("Fatalities", "Injuries", "Casualties Per Accident")
                 )
                 )
               ),
@@ -53,7 +53,7 @@ dashboardBody(
                   plotOutput("CasualtyProportionPlot")))),
               tabPanel("Accidents per Year", fluidRow(
                 column(width =12, selectizeInput(inputId = "Case1",
-                                                 label = "Casualty",
+                                                 label = "Case",
                                                  choices = c("All", "Fatalities", "Injuries", "Property Damage")
                 )
                 )

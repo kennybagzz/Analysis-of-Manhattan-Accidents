@@ -51,10 +51,10 @@ graph_people_killed_yr = ggplot(data=people_killed_a_year, aes(x=year, y=people_
   xlab("Year") + 
   theme(plot.title = element_text(size=28))+
   theme(axis.title = element_text(size = 24))+
-  theme(axis.text = element_text(size = 16))+
-  geom_label_repel(aes(label = people_killed),size = 6)+
+  theme(axis.text = element_text(size = 18))+
+  geom_label_repel(aes(label = people_killed),size = 7)+
   scale_y_continuous(breaks = seq(20, 45, by =5))+
-  ggtitle("People Killed Per Year in Manhattan")
+  ggtitle("Fatalities Per Year in Manhattan")
 graph_people_killed_yr
 
 graph_people_injured_yr = ggplot(data=people_injured_a_year, aes(x=year, y=people_injured, group=1)) +
@@ -64,9 +64,10 @@ graph_people_injured_yr = ggplot(data=people_injured_a_year, aes(x=year, y=peopl
   xlab("Year") + 
   theme(plot.title = element_text(size=28))+
   theme(axis.title = element_text(size = 24))+
-  theme(axis.text = element_text(size = 16))+
-  geom_label_repel(aes(label = people_injured),size = 6)+
-  ggtitle("People Injured Per Year in Manhattan")
+  theme(axis.text = element_text(size = 18))+
+  geom_label_repel(aes(label = people_injured),size = 7)+
+  ggtitle("Injuries Per Year in Manhattan")
+graph_people_injured_yr
 graph_people_injured_yr
 
 casualties_by_year =data.frame(year = c(2013:2021),
@@ -74,6 +75,18 @@ casualties_by_year =data.frame(year = c(2013:2021),
 casualties_by_year$casualties_per_accident = casualties_by_year$casualties/manhattan_crashes_by_year$n
 casualties_by_year$casualties_per_accident =round(casualties_by_year$casualties_per_accident, digits = 2)
 
+casualties_per_accident_graph = ggplot(data=casualties_by_year , aes(x=year, y=casualties_per_accident)) +
+  geom_line(color = 'blue')+
+  geom_point(size = 4)+
+  ylab("Total") +
+  xlab("Year") + 
+  theme(plot.title = element_text(size=28))+
+  theme(axis.title = element_text(size = 24))+
+  theme(axis.text = element_text(size = 18))+
+  scale_x_continuous(breaks=seq(2013,2021,1)) +
+geom_label_repel(aes(label = casualties_per_accident),size = 7)+
+  ggtitle("Casualties Per Accident in Manhattan")
+casualties_per_accident_graph
 #find out how many accidents a year
 manhattan_crashes_by_year = cleaned_manhattan_crashes %>% count(year)
 #use a line graph to visualize
@@ -84,9 +97,9 @@ accidents_per_yr_graph = ggplot(data=manhattan_crashes_by_year, aes(x=year, y=n,
   xlab("Year") + 
   theme(plot.title = element_text(size=28))+
   theme(axis.title = element_text(size = 24))+
-  theme(axis.text = element_text(size = 16))+
-  geom_label_repel(aes(label = n),size = 6)+
-  ggtitle("Number of Accidents Per Year in Manhattan")
+  theme(axis.text = element_text(size = 18))+
+  geom_label_repel(aes(label = n),size = 7)+
+  ggtitle("Accidents Per Year in Manhattan")
 accidents_per_yr_graph
 
 
@@ -208,8 +221,8 @@ accidents_per_year_injured =
   xlab("Year") + 
   theme(plot.title = element_text(size=20))+
   theme(axis.title = element_text(size = 24))+
-  theme(axis.text = element_text(size = 16))+
-  geom_label_repel(aes(label = n),size = 5)+
+  theme(axis.text = element_text(size = 18))+
+  geom_label_repel(aes(label = n),size = 7)+
   ggtitle("Accidents Involving At Least One Injury and No Fatalities")
 accidents_per_year_injured
 
@@ -228,14 +241,14 @@ accidents_per_year_injured_proportion
 
 accidents_per_year_property =
   ggplot(data=manhattan_crashes_by_year_property, aes(x=year, y=n, group=1)) +
-  geom_line()+
+  geom_line(color = 'red')+
   geom_point(size = 4) +
   ylab("Total Accidents") +
   xlab("Year") + 
   theme(plot.title = element_text(size=28))+
   theme(axis.title = element_text(size = 24))+
   theme(axis.text = element_text(size = 16))+
-  geom_label_repel(aes(label = n),size = 5)+
+  geom_label_repel(aes(label = n),size = 6)+
   ggtitle("Accidents Involving Only Property Damage")
 accidents_per_year_property
 
@@ -252,25 +265,28 @@ accidents_per_year_property_proportion =
   ggtitle("Proportions of Accidents Involving Only Property Damage")
 accidents_per_year_property_proportion
 
-colorss <- c("Property" = "blue", "Injuries" = "green", "Fatalities" = "red")
+
+colorsss <- c("All" = "black", "Property" = "blue", "Injuries" = "green", "Fatalities" = "red")
 idc = ggplot(data=manhattan_crashes_by_year_killed, aes(x=year, y=n, group=1)) +
   geom_line(aes(color = "Fatalities"))+
+  geom_line(data=manhattan_crashes_by_year, aes(x=year, y=n, color = "All"))+
   geom_line(data=manhattan_crashes_by_year_injured, aes(x=year,y=n, color = "Injuries")) + 
   geom_line(data=manhattan_crashes_by_year_property, aes(x=year, y=n, color = "Property"), color = 'blue')+
   geom_point(aes(color = "Fatalities"),size = 4) +
+  geom_point(data=manhattan_crashes_by_year, aes(color = "All"),size = 4)+
   geom_point(data = manhattan_crashes_by_year_injured,size = 4, aes(color = "Injuries"))+
   geom_point(data=manhattan_crashes_by_year_property, size = 4, aes(color = "Property"), color = 'blue')+
   ylab("Total Accidents") +
   xlab("Year") + 
   labs(color = "Legend")+
-  theme(plot.title = element_text(size=22))+
-  theme(axis.title = element_text(size = 24))+
+  theme(plot.title = element_text(size=25))+
+  theme(axis.title = element_text(size = 20))+
   theme(axis.text = element_text(size = 16))+
-  geom_label_repel(data = manhattan_crashes_by_year_property[manhattan_crashes_by_year_property$year == c(2016,2020,2018),],aes(label = n),size = 4)+
-  geom_label_repel(data = manhattan_crashes_by_year_injured[manhattan_crashes_by_year_injured$year == c(2013,2020,2018),],aes(label = n),size = 4, y_lim = c(NA,40), na.rm = TRUE)+
-  geom_label_repel(data = manhattan_crashes_by_year_killed[manhattan_crashes_by_year_killed$year == c(2013:2021),],aes(label = n),size = 4)+
-  scale_y_continuous(breaks = seq(0, 36000, by = 4000))+
-  scale_color_manual(values = colorss)+
+  geom_label_repel(data = manhattan_crashes_by_year_property[manhattan_crashes_by_year_property$year == c(2016,2020,2018),],aes(label = n),size = 5)+
+  geom_label_repel(data = manhattan_crashes_by_year_injured[manhattan_crashes_by_year_injured$year == c(2013,2020,2018),],aes(label = n),size = 5, y_lim = c(NA,40), na.rm = TRUE)+
+  geom_label_repel(data = manhattan_crashes_by_year_killed[manhattan_crashes_by_year_killed$year == c(2013:2021),],aes(label = n),size = 5)+
+  scale_y_continuous(breaks = seq(0, 44000, by = 4000))+
+  scale_color_manual(values = colorsss)+
   theme(legend.title = element_text(size = 16),
         legend.text = element_text(size = 14),
         legend.key.height = unit(1,'cm'),
@@ -293,9 +309,13 @@ idc_proportions = ggplot(data=manhattan_crashes_by_year_killed, aes(x=year, y=pr
   theme(axis.title = element_text(size = 20))+
   theme(axis.text = element_text(size = 14))+
   scale_y_continuous(breaks = seq(0,90, by = 10))+
-  geom_label_repel(data = manhattan_crashes_by_year_property[manhattan_crashes_by_year_property$year == c(2013,2020,2021),],aes(label = proportion),size = 4)+
-  geom_label_repel(data = manhattan_crashes_by_year_injured[manhattan_crashes_by_year_injured$year == c(2013,2020,2021),],aes(label = proportion),size = 4, y_lim = c(NA,40))+
-  geom_label_repel(aes(label = proportion),size = 4)+
+  geom_label_repel(data = manhattan_crashes_by_year_property[manhattan_crashes_by_year_property$year == c(2013,2020,2021),],aes(label = proportion),size = 5)+
+  geom_label_repel(data = manhattan_crashes_by_year_injured[manhattan_crashes_by_year_injured$year == c(2013,2020,2021),],aes(label = proportion),size = 5, y_lim = c(NA,40))+
+  geom_label_repel(aes(label = proportion),size = 5)+
+  theme(legend.title = element_text(size = 16),
+        legend.text = element_text(size = 14),
+        legend.key.height = unit(1,'cm'),
+        legend.key.width = unit(1,"cm"))+
   scale_color_manual(values = colorss)+
   ggtitle("Proportions by Case")
 idc_proportions
@@ -332,7 +352,7 @@ density_map
 
 #I have highlighted the intersections that have witnessed at least one accident per week on average
 accidents_group_by_latlong= manhattan_crashes_lat_lon %>%
-  group_by(latitude = cut(LATITUDE, breaks = seq(latitude_min, latitude_max+264/364000*4, 264/364000*4),dig.lab = 8), longitude = cut(LONGITUDE, breaks = seq(longitude_min, longitude_max+ 264/364000*4, 264/364000*4),dig.lab = 8)) %>%
+  group_by(latitude = cut(LATITUDE, breaks = seq(latitude_min, latitude_max+264/364000*3, 264/364000*3),dig.lab = 8), longitude = cut(LONGITUDE, breaks = seq(longitude_min, longitude_max+ 264/364000*3, 264/364000*3),dig.lab = 8)) %>%
   summarise(n = n())
 accidents_group_by_latlong$accidents_per_week = accidents_group_by_latlong$n/468  
 accidents_group_by_latlong = na.omit(accidents_group_by_latlong)
@@ -385,17 +405,7 @@ accidents_group_by_latlongyear$middle_longitude = (accidents_group_by_latlongyea
 
 
 
-a =accidents_group_by_latlong[1,1]
-a
-axx = as.vector(a$latitude[1])[1]
-axx
-bxx = gsub("\\(|\\]","", axx)
-bxx
 
-cxx = unlist(strsplit(bxx,","))
-cxx
-dxx = as.numeric(cxx[1])
-dxx
 
 
 getting_latlong_from_dataframe = function(df,df_column_name,one_or_two, new_column_name) {
@@ -406,7 +416,6 @@ getting_latlong_from_dataframe = function(df,df_column_name,one_or_two, new_colu
 }
 nrow(accidents_group_by_latlong) *2
 
-getting_latlong_from_dataframe(accidents_group_by_latlong,"latitude", 1, "latitude1")
 
 a =accidents_group_by_latlong[,"latitude"]
 axx = as.vector(a$latitude)
@@ -447,6 +456,96 @@ accidents_group_by_latlong$longitude2 = ebb
 accidents_group_by_latlong$middle_latitude = (accidents_group_by_latlong$latitude1 +accidents_group_by_latlong$latitude2)/2
 
 accidents_group_by_latlong$middle_longitude = (accidents_group_by_latlong$longitude1 + accidents_group_by_latlong$longitude2)/2
+accidents_group_by_latlong = accidents_group_by_latlong[-c(440),]
+accidents_group_by_latlong = accidents_group_by_latlong[-c(492),]
+
+view(accidents_group_by_latlong)
+
+neighborhood = accidents_group_by_latlongyear[accidents_group_by_latlongyear$middle_latitude == 40.7563315,]
+neighborhood1 = neighborhood[neighborhood$middle_longitude > -73.9908621 & neighborhood$middle_longitude < -73.9908619,]
+neighborhood1[9,] = list("(40.755244,40.757419]",
+"(-73.99195,-73.989774]",
+"2021",
+29,
+0.5576923077,
+40.755244,
+40.757419,
+-73.989774,
+-73.989774,
+40.7563315,
+-73.9897740)
+neighborhood1$accidents_per_week = round(neighborhood1$accidents_per_week, digits = 1)
+
+neighborhood1_progression = ggplot(data=neighborhood1, aes(x=year, y=accidents_per_week, group=1)) +
+  geom_line(color = 'blue')+
+  geom_point(size = 4) +
+  ylab("Accidents Per Week") +
+  xlab("Year") + 
+  theme(plot.title = element_text(size=28))+
+  theme(axis.title = element_text(size = 24))+
+  theme(axis.text = element_text(size = 16))+
+  geom_label_repel(aes(label = accidents_per_week),size = 5)+
+  ggtitle("Accidents Per Week from 39th-42nd St and 8th Ave")
+neighborhood1_progression
+
+neighborhoodx = accidents_group_by_latlongyear[accidents_group_by_latlongyear$middle_latitude == 40.7606830,]
+
+neighborhood2 =neighborhoodx[neighborhoodx$middle_longitude > -73.9647521 & neighborhoodx$middle_longitude < -73.9647519,]
+
+neighborhood2[9,] = list("(40.759595,40.761771]",
+"(-73.96584,-73.963664]",
+"2021",
+40,
+0.769230769,
+40.759595,
+40.761771,
+-73.963664,
+-73.963664,
+40.760683,
+-73.963664)
+neighborhood2$accidents_per_week = round(neighborhood2$accidents_per_week, digits = 1)
+
+neighborhood2_progression = ggplot(data=neighborhood2, aes(x=year, y=accidents_per_week, group=1)) +
+  geom_line(color = 'orange')+
+  geom_point(size = 4) +
+  ylab("Accidents Per Week") +
+  xlab("Year") + 
+  theme(plot.title = element_text(size=28))+
+  theme(axis.title = element_text(size = 24))+
+  theme(axis.text = element_text(size = 16))+
+  geom_label_repel(aes(label = accidents_per_week),size = 7)+
+  ggtitle("Accidents Per Week from 57th-60th St and 2nd Ave")
+neighborhood2_progression
+
+
+neighborhoody = accidents_group_by_latlongyear[accidents_group_by_latlongyear$middle_latitude > 40.7323974 &accidents_group_by_latlongyear$middle_latitude < 40.7323976,]
+
+neighborhood3 =neighborhoody[neighborhoody$middle_longitude > -73.9865106 & neighborhoody$middle_longitude < -73.9865104,]
+
+neighborhood3[9,] = list("(40.73131,40.733485]",
+"(-73.987598,-73.985423]",
+"2021",
+14,
+0.2692307692,
+40.73131,
+40.733485,
+-73.985423,
+-73.985423,
+40.7323975,
+-73.9854230)
+neighborhood3$accidents_per_week = round(neighborhood3$accidents_per_week, digits = 1)
+
+neighborhood3_progression = ggplot(data=neighborhood3, aes(x=year, y=accidents_per_week, group=1)) +
+  geom_line(color = 'brown')+
+  geom_point(size = 4) +
+  ylab("Accidents Per Week") +
+  xlab("Year") + 
+  theme(plot.title = element_text(size=28))+
+  theme(axis.title = element_text(size = 24))+
+  theme(axis.text = element_text(size = 16))+
+  geom_label_repel(aes(label = accidents_per_week),size = 7)+
+  ggtitle("Accidents Per Week from 12th-15th St and 2nd/3rd Ave")
+neighborhood3_progression
 
 
 
